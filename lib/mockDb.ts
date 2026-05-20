@@ -82,7 +82,7 @@ export interface AddressRecord {
 }
 
 export interface OrderRecord {
-  id: number;
+  id: string;
   createdAt: string;
   customerEmail?: string;
   items: Array<{
