@@ -1,5 +1,5 @@
 import clientPromise from "./mongodb";
-import { ObjectId } from "mongodb";
+import { ObjectId, Document } from "mongodb";
 import {
   ProductRecord,
   UserRecord,
@@ -15,7 +15,9 @@ import {
 
 const DB_NAME = "munch";
 
-async function getCollection<T>(collectionName: string) {
+async function getCollection<T extends Document>(
+  collectionName: string
+) {
   const client = await clientPromise;
   return client.db(DB_NAME).collection<T>(collectionName);
 }
