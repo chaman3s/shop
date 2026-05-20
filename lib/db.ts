@@ -57,24 +57,40 @@ export async function addProduct(input: {
   }
 
   const productsCollection = await getCollection<ProductRecord>("products");
-  const product: Omit<ProductRecord, "id"> & { _id?: any } = {
-    name,
-    price: input.price,
-    image,
-    description: input.description?.trim() || "No description added yet.",
-    category: input.category?.trim() || "General",
-    weight: input.weight?.trim() || "N/A",
-    ingredients: "Not specified",
-    nutritionalInfo: {
-      calories: "N/A",
-      protein: "N/A",
-      carbs: "N/A",
-      fat: "N/A",
-    },
-    inStock: true,
-    rating: 4.0,
-    reviews: 0,
-  };
+ const product: Omit<ProductRecord, "id"> & {
+  _id?: any;
+} = {
+  name,
+  price: input.price,
+  image,
+
+  description:
+    input.description?.trim() ||
+    "No description added yet.",
+
+  category:
+    input.category?.trim() || "General",
+
+  weight:
+    input.weight?.trim() || "N/A",
+
+  ingredients: "Not specified",
+
+  nutritionalInfo: {
+    calories: "N/A",
+    protein: "N/A",
+    carbs: "N/A",
+    fat: "N/A",
+  },
+
+  inStock: true,
+
+  stockQuantity: 100,
+
+  rating: 4.0,
+
+  reviews: 0,
+};
 
   const result = await productsCollection.insertOne(product as any);
   product._id = result.insertedId;
