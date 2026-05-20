@@ -51,7 +51,7 @@ export default function Cart() {
           ) : (
             <div className="space-y-4">
               {items.map((item) => (
-                <div key={item.id} className="flex gap-4 border-b border-zinc-200 dark:border-zinc-800 pb-4">
+                <div key={String(item.id)} className="flex gap-4 border-b border-zinc-200 dark:border-zinc-800 pb-4">
                   <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 bg-zinc-100 dark:bg-zinc-800">
                     <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
                   </div>
@@ -60,14 +60,14 @@ export default function Cart() {
                     <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-1">₹{item.price.toFixed(2)}</p>
                     <div className="flex items-center gap-2 mt-2">
                       <button
-                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                        onClick={() => updateQuantity(String(item.id), item.quantity - 1)}
                         className="w-7 h-7 rounded border border-zinc-300 dark:border-zinc-700 flex items-center justify-center hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
                       >
                         -
                       </button>
                       <span className="w-8 text-center text-sm">{item.quantity}</span>
                       <button
-                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                        onClick={() => updateQuantity(String(item.id), item.quantity + 1)}
                         className="w-7 h-7 rounded border border-zinc-300 dark:border-zinc-700 flex items-center justify-center hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
                       >
                         +
@@ -76,7 +76,7 @@ export default function Cart() {
                   </div>
                   <div className="flex flex-col items-end justify-between">
                     <button
-                      onClick={() => removeFromCart(item.id)}
+                      onClick={() => removeFromCart(String(item.id))}
                       className="text-red-500 hover:text-red-600 p-1"
                       aria-label="Remove item"
                     >
