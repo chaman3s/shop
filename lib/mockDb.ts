@@ -70,7 +70,7 @@ export interface PendingSignupRecord {
 }
 
 export interface AddressRecord {
-  id: number;
+  id: string;
   name: string;
   mobile: string;
   pincode: string;

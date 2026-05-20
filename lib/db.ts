@@ -407,7 +407,10 @@ export async function addAddress(
 ): Promise<AddressRecord> {
   const addressesCollection = await getCollection<AddressRecord>("addresses");
   const result = await addressesCollection.insertOne(address as any);
-  return { ...address, id: result.insertedId.toString() };
+  return {
+  ...address,
+  id: Number(result.insertedId.toString()),
+};
 }
 
 export async function createOrder(
