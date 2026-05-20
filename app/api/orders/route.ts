@@ -2,7 +2,9 @@ import { NextResponse } from "next/server";
 import { createOrder, getAllOrders } from "@/lib/services";
 
 export async function GET() {
-  return NextResponse.json({ orders: await getAllOrders() });
+  return NextResponse.json({
+    orders: await getAllOrders(),
+  });
 }
 
 export async function POST(request: Request) {
@@ -20,26 +22,37 @@ export async function POST(request: Request) {
     total?: number;
   };
 
+  const addressId = Number(body.addressId);
+
   if (
     !body.items ||
     body.items.length === 0 ||
-    body.addressId == null ||
+    Number.isNaN(addressId) ||
     !body.paymentMethod ||
     typeof body.total !== "number"
   ) {
     return NextResponse.json(
       { message: "Invalid order payload." },
-      { status: 400 },
+      { status: 400 }
     );
   }
 
   const order = await createOrder({
-    customerEmail: body.customerEmail?.trim().toLowerCase() || undefined,
+    customerEmail:
+      body.customerEmail?.trim().toLowerCase() ||
+      undefined,
+
     items: body.items,
-    addressId: body.addressId,
+
+    addressId,
+
     paymentMethod: body.paymentMethod,
+
     total: body.total,
   });
 
-  return NextResponse.json({ order }, { status: 201 });
+  return NextResponse.json(
+    { order },
+    { status: 201 }
+  );
 }
