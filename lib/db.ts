@@ -409,7 +409,7 @@ export async function addAddress(
   const result = await addressesCollection.insertOne(address as any);
   return {
   ...address,
-  id: Number(result.insertedId.toString()),
+  id: result.insertedId.toString(),
 };
 }
 
