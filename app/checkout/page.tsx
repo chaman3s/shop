@@ -249,7 +249,12 @@ const handleApplyCoupon = async () => {
           return;
         }
         if (body.paymentSessionId) {
-          const cashfree = await load({ mode: "sandbox" });
+          const cashfree = await load({
+  mode:
+    process.env.NEXT_PUBLIC_CASHFREE_ENV === "PRODUCTION"
+      ? "production"
+      : "sandbox",
+});
           await cashfree.checkout({ paymentSessionId: body.paymentSessionId, redirectTarget: "_self" });
           return;
         }
