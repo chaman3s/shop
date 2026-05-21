@@ -1,5 +1,5 @@
 import clientPromise from "./mongodb";
-import { ObjectId, Document } from "mongodb";
+import { ObjectId, Document , Filter} from "mongodb";
 import {
   ProductRecord,
   UserRecord,
@@ -22,14 +22,15 @@ async function getCollection<T extends Document>(
   return client.db(DB_NAME).collection<T>(collectionName);
 }
 
-function buildObjectIdQuery(id: string): { _id: ObjectId | string } {
+function buildObjectIdQuery<T extends Document>(
+  id: string,
+): Filter<T> {
   try {
-    return { _id: new ObjectId(id) };
+    return { _id: new ObjectId(id) } as Filter<T>;
   } catch {
-    return { _id: id };
+    return { _id: id as any } as Filter<T>;
   }
 }
-
 export async function getAllProducts(): Promise<ProductRecord[]> {
   const productsCollection = await getCollection<ProductRecord>("products");
   const products = await productsCollection.find({}).toArray();
@@ -417,13 +418,19 @@ export async function createOrder(
   input: Omit<OrderRecord, "id" | "createdAt" | "status">,
 ): Promise<OrderRecord> {
   const ordersCollection = await getCollection<OrderRecord>("orders");
-  const order = {
+
+  const order: Omit<OrderRecord, "id"> = {
     ...input,
     createdAt: new Date().toISOString(),
     status: "pending",
   };
+
   const result = await ordersCollection.insertOne(order as any);
-  return { ...order, id: result.insertedId.toString() };
+
+  return {
+    ...order,
+    id: result.insertedId.toString(),
+  };
 }
 
 export async function getAllOrders() {
