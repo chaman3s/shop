@@ -130,6 +130,7 @@ export const products: ProductRecord[] = [
     inStock: true,
     rating: 4.5,
     reviews: 128,
+    stockQuantity: 100,
   },
   {
     id: 2,
@@ -150,6 +151,7 @@ export const products: ProductRecord[] = [
     inStock: true,
     rating: 4.7,
     reviews: 95,
+    stockQuantity: 100,
   },
   {
     id: 3,
@@ -171,6 +173,7 @@ export const products: ProductRecord[] = [
     inStock: true,
     rating: 4.8,
     reviews: 156,
+    stockQuantity: 100,
   },
   {
     id: 4,
@@ -191,6 +194,7 @@ export const products: ProductRecord[] = [
     inStock: true,
     rating: 4.3,
     reviews: 87,
+    stockQuantity: 100,
   },
   {
     id: 5,
@@ -211,6 +215,7 @@ export const products: ProductRecord[] = [
     inStock: true,
     rating: 4.6,
     reviews: 203,
+    stockQuantity: 100,
   },
   {
     id: 6,
@@ -231,6 +236,7 @@ export const products: ProductRecord[] = [
     inStock: true,
     rating: 4.9,
     reviews: 241,
+    stockQuantity: 100,
   },
 ];
 
@@ -308,7 +314,7 @@ export const pendingSignups: PendingSignupRecord[] = [];
 
 export const addresses: AddressRecord[] = [
   {
-    id: 1,
+    id: "1",
     name: "John Doe",
     mobile: "9876543210",
     pincode: "400001",
