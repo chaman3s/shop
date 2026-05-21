@@ -1,44 +1,66 @@
 "use client";
 
 import Link from "next/link";
+import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
 
-export default function AdminLoginPage() {
+function AdminLoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectTo = searchParams.get("redirect") || "/admin/dashboard";
+
+  const redirectTo =
+    searchParams.get("redirect") || "/admin/dashboard";
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (
+    event: React.FormEvent<HTMLFormElement>
+  ) => {
     event.preventDefault();
+
     setIsSubmitting(true);
     setError("");
 
     const formData = new FormData(event.currentTarget);
+
     const email = String(formData.get("email") ?? "");
     const password = String(formData.get("password") ?? "");
 
     try {
       const response = await fetch("/api/auth/admin/login", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
       });
 
       if (!response.ok) {
-        const body = (await response.json()) as { message?: string };
-        throw new Error(body.message || "Unable to sign in as admin.");
+        const body = (await response.json()) as {
+          message?: string;
+        };
+
+        throw new Error(
+          body.message || "Unable to sign in as admin."
+        );
       }
 
-      localStorage.setItem("munch_admin_logged_in", "true");
+      localStorage.setItem(
+        "munch_admin_logged_in",
+        "true"
+      );
+
       router.push(redirectTo);
     } catch (submitError) {
       const message =
         submitError instanceof Error
           ? submitError.message
           : "Unable to sign in as admin.";
+
       setError(message);
     } finally {
       setIsSubmitting(false);
@@ -52,13 +74,21 @@ export default function AdminLoginPage() {
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500">
             Admin Access
           </p>
-          <h1 className="mt-2 text-2xl font-bold">Admin Sign in</h1>
+
+          <h1 className="mt-2 text-2xl font-bold">
+            Admin Sign in
+          </h1>
+
           <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
-            Sign in with admin credentials to manage the platform.
+            Sign in with admin credentials to manage the
+            platform.
           </p>
         </div>
 
-        <form className="space-y-4" onSubmit={handleSubmit}>
+        <form
+          className="space-y-4"
+          onSubmit={handleSubmit}
+        >
           {error && (
             <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
               {error}
@@ -66,9 +96,13 @@ export default function AdminLoginPage() {
           )}
 
           <div>
-            <label htmlFor="email" className="mb-1 block text-sm font-medium">
+            <label
+              htmlFor="email"
+              className="mb-1 block text-sm font-medium"
+            >
               Admin Email
             </label>
+
             <input
               id="email"
               name="email"
@@ -80,9 +114,13 @@ export default function AdminLoginPage() {
           </div>
 
           <div>
-            <label htmlFor="password" className="mb-1 block text-sm font-medium">
+            <label
+              htmlFor="password"
+              className="mb-1 block text-sm font-medium"
+            >
               Password
             </label>
+
             <input
               id="password"
               name="password"
@@ -98,14 +136,18 @@ export default function AdminLoginPage() {
             disabled={isSubmitting}
             className="w-full rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-zinc-700 disabled:opacity-60 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200"
           >
-            {isSubmitting ? "Signing in..." : "Admin Sign in"}
+            {isSubmitting
+              ? "Signing in..."
+              : "Admin Sign in"}
           </button>
         </form>
 
         <p className="mt-5 text-center text-sm text-zinc-600 dark:text-zinc-400">
           User account?{" "}
           <Link
-            href={`/auth/login?redirect=${encodeURIComponent(redirectTo)}`}
+            href={`/auth/login?redirect=${encodeURIComponent(
+              redirectTo
+            )}`}
             className="font-semibold hover:underline"
           >
             Go to user login
@@ -113,5 +155,13 @@ export default function AdminLoginPage() {
         </p>
       </div>
     </main>
+  );
+}
+
+export default function AdminLoginPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <AdminLoginContent />
+    </Suspense>
   );
 }
