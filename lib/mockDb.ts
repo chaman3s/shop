@@ -92,7 +92,7 @@ export interface OrderRecord {
     quantity: number;
     image?: string;
   }>;
-  addressId: number;
+  addressId: string | number;
   paymentMethod: string;
   total: number;
   status:

@@ -15,10 +15,11 @@ export async function POST(request: Request) {
     total?: number;
     customerEmail?: string;
     customerPhone?: string;
-    couponCode?: string; // ← ADD THIS
+    couponCode?: string;
   };
 
-  const addressId = Number(body.addressId);
+  // ✅ Keep as string — addressId can be a MongoDB ObjectId
+  const addressId = body.addressId != null ? String(body.addressId).trim() : '';
 
   const total =
     typeof body.total === "number"
@@ -30,10 +31,10 @@ export async function POST(request: Request) {
   if (
     !body.items ||
     body.items.length === 0 ||
-    Number.isNaN(addressId) ||
+    !addressId ||                          // ✅ just check it's not empty
     body.paymentMethod?.trim() !== "cashfree" ||
     Number.isNaN(total) ||
-    total <= 0 || // ← ADD THIS: catches zero/negative totals
+    total <= 0 ||
     !customerEmail
   ) {
     return NextResponse.json(
@@ -45,21 +46,18 @@ export async function POST(request: Request) {
   try {
     const payment = await createCashfreePayment({
       items: body.items,
-      addressId,
+      addressId,                           // ✅ pass as string
       paymentMethod: body.paymentMethod?.trim() ?? "cashfree",
       total,
       customerEmail,
       customerPhone: body.customerPhone?.trim(),
-      couponCode: body.couponCode?.trim(), // ← ADD THIS
+      couponCode: body.couponCode?.trim(),
     });
 
     return NextResponse.json(payment, { status: 201 });
   } catch (error) {
     const message =
-      error instanceof Error
-        ? error.message
-        : "Cashfree request failed.";
-
+      error instanceof Error ? error.message : "Cashfree request failed.";
     return NextResponse.json({ message }, { status: 500 });
   }
 }
