@@ -212,82 +212,108 @@ const handleApplyCoupon = async () => {
   };
 
   const handlePlaceOrder = async () => {
-    if (!selectedAddressValue) return;
-    if (selectedPayment === 'cashfree' && !userEmail) {
-      setOrderError('Please sign in again so we can use your email for payment.');
-      return;
-    }
-    try {
-      setOrderError('');
-      if (selectedPayment === 'cashfree') {
-        setIsRedirectingToPayment(true);
-        const response = await fetch('/api/cashfree/order', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            items: items.map((item) => ({ id: item.id, name: item.name, price: item.price, quantity: item.quantity, image: item.image })),
-            addressId: selectedAddressValue,
-            paymentMethod: selectedPayment,
-            total: finalTotal,
-            customerEmail: userEmail,
-            customerPhone: selectedAddressData?.mobile,
-            couponCode: appliedCoupon?.code,
-            discount,
-          }),
-        });
-        if (!response.ok) {
-          const body = (await response.json()) as { message?: string };
-          throw new Error(body.message || 'Unable to create Cashfree payment.');
-        }
-        const body = (await response.json()) as {
-          paymentLink?: string;
-          paymentSessionId?: string;
-          cashfreeRaw?: any;
-        };
-        if (body.paymentLink) {
-          window.location.href = body.paymentLink;
-          return;
-        }
-        if (body.paymentSessionId) {
-          const cashfree = await load({
-  mode:
-    process.env.NEXT_PUBLIC_CASHFREE_ENV === "PRODUCTION"
-      ? "production"
-      : "sandbox",
-});
-          await cashfree.checkout({ paymentSessionId: body.paymentSessionId, redirectTarget: "_self" });
-          return;
-        }
-        throw new Error('Cashfree did not return a payment link or session id.');
-      }
-      setIsSubmittingOrder(true);
-      const response = await fetch('/api/orders', {
+  if (!selectedAddressValue) return;
+  if (selectedPayment === 'cashfree' && !userEmail) {
+    setOrderError('Please sign in again so we can use your email for payment.');
+    return;
+  }
+  try {
+    setOrderError('');
+    if (selectedPayment === 'cashfree') {
+      setIsRedirectingToPayment(true);
+      const response = await fetch('/api/cashfree/order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          customerEmail: userEmail || undefined,
-          items: items.map((item) => ({ id: item.id, name: item.name, price: item.price, quantity: item.quantity, image: item.image })),
+          items: items.map((item) => ({
+            id: item.id,
+            name: item.name,
+            price: item.price,
+            quantity: item.quantity,
+            image: item.image,
+          })),
           addressId: selectedAddressValue,
           paymentMethod: selectedPayment,
           total: finalTotal,
+          customerEmail: userEmail,
+          customerPhone: selectedAddressData?.mobile,
           couponCode: appliedCoupon?.code,
           discount,
         }),
       });
+
+      // ✅ Read body ONCE
+      const body = (await response.json()) as {
+        message?: string;
+        paymentLink?: string;
+        paymentSessionId?: string;
+        cashfreeRaw?: any;
+      };
+
       if (!response.ok) {
-        const body = (await response.json()) as { message?: string };
-        throw new Error(body.message || 'Unable to place order.');
+        throw new Error(body.message || 'Unable to create Cashfree payment.');
       }
-      clearCart();
-      alert('Order placed successfully!');
-      router.push('/');
-    } catch (error) {
-      setOrderError(error instanceof Error ? error.message : 'Unable to place order.');
-    } finally {
-      setIsSubmittingOrder(false);
-      setIsRedirectingToPayment(false);
+
+      if (body.paymentLink) {
+        window.location.href = body.paymentLink;
+        return;
+      }
+
+      if (body.paymentSessionId) {
+        const cashfree = await load({
+          mode:
+            process.env.NEXT_PUBLIC_CASHFREE_ENV === 'PRODUCTION'
+              ? 'production'
+              : 'sandbox',
+        });
+        await cashfree.checkout({
+          paymentSessionId: body.paymentSessionId,
+          redirectTarget: '_self',
+        });
+        return;
+      }
+
+      throw new Error('Cashfree did not return a payment link or session id.');
     }
-  };
+
+    // Non-cashfree payment path
+    setIsSubmittingOrder(true);
+    const response = await fetch('/api/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        customerEmail: userEmail || undefined,
+        items: items.map((item) => ({
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity,
+          image: item.image,
+        })),
+        addressId: selectedAddressValue,
+        paymentMethod: selectedPayment,
+        total: finalTotal,
+        couponCode: appliedCoupon?.code,
+        discount,
+      }),
+    });
+
+    const body = (await response.json()) as { message?: string };
+
+    if (!response.ok) {
+      throw new Error(body.message || 'Unable to place order.');
+    }
+
+    clearCart();
+    alert('Order placed successfully!');
+    router.push('/');
+  } catch (error) {
+    setOrderError(error instanceof Error ? error.message : 'Unable to place order.');
+  } finally {
+    setIsSubmittingOrder(false);
+    setIsRedirectingToPayment(false);
+  }
+};
 
   if (!isAuthChecked) {
     return (
