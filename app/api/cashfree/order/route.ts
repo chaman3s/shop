@@ -15,6 +15,7 @@ export async function POST(request: Request) {
     total?: number;
     customerEmail?: string;
     customerPhone?: string;
+    couponCode?: string; // ← ADD THIS
   };
 
   const addressId = Number(body.addressId);
@@ -32,6 +33,7 @@ export async function POST(request: Request) {
     Number.isNaN(addressId) ||
     body.paymentMethod?.trim() !== "cashfree" ||
     Number.isNaN(total) ||
+    total <= 0 || // ← ADD THIS: catches zero/negative totals
     !customerEmail
   ) {
     return NextResponse.json(
@@ -44,25 +46,20 @@ export async function POST(request: Request) {
     const payment = await createCashfreePayment({
       items: body.items,
       addressId,
-      paymentMethod:
-        body.paymentMethod?.trim() ?? "cashfree",
+      paymentMethod: body.paymentMethod?.trim() ?? "cashfree",
       total,
       customerEmail,
       customerPhone: body.customerPhone?.trim(),
+      couponCode: body.couponCode?.trim(), // ← ADD THIS
     });
 
-    return NextResponse.json(payment, {
-      status: 201,
-    });
+    return NextResponse.json(payment, { status: 201 });
   } catch (error) {
     const message =
       error instanceof Error
         ? error.message
         : "Cashfree request failed.";
 
-    return NextResponse.json(
-      { message },
-      { status: 500 }
-    );
+    return NextResponse.json({ message }, { status: 500 });
   }
 }
